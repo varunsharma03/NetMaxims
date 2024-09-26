@@ -129,7 +129,9 @@ const MyForm = () => {
   });
 
   const onSubmit = (data) => {
-    console.log(data);
+    console.log(data)
+    const a = [data.role,...data.email,...data.warehouse];
+    window.alert(a)
   };
 
   return (
