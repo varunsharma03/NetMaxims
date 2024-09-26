@@ -1,115 +1,198 @@
-import Image from "next/image";
-import localFont from "next/font/local";
+import React, { useState, useRef, useEffect } from 'react';
+import { useForm, Controller } from 'react-hook-form';
 
-const geistSans = localFont({
-  src: "./fonts/GeistVF.woff",
-  variable: "--font-geist-sans",
-  weight: "100 900",
-});
-const geistMono = localFont({
-  src: "./fonts/GeistMonoVF.woff",
-  variable: "--font-geist-mono",
-  weight: "100 900",
-});
+const MultiSelectDropdown = ({ options, selectedValues, onChange }) => {
+  const [isOpen, setIsOpen] = useState(false);
+  const dropdownRef = useRef(null); 
+  const handleToggleDropdown = () => {
+    setIsOpen((prev) => !prev);
+  };
 
-export default function Home() {
+  const handleChange = (value) => {
+    onChange(selectedValues.includes(value)
+      ? selectedValues.filter((v) => v !== value)
+      : [...selectedValues, value]);
+  };
+
+  const handleRemove = (value) => {
+    onChange(selectedValues.filter((v) => v !== value));
+  };
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsOpen(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [dropdownRef]);
+
   return (
-    <div
-      className={`${geistSans.variable} ${geistMono.variable} grid grid-rows-[20px_1fr_20px] items-center justify-items-center min-h-screen p-8 pb-20 gap-16 sm:p-20 font-[family-name:var(--font-geist-sans)]`}
-    >
-      <main className="flex flex-col gap-8 row-start-2 items-center sm:items-start">
-        <Image
-          className="dark:invert"
-          src="https://nextjs.org/icons/next.svg"
-          alt="Next.js logo"
-          width={180}
-          height={38}
-          priority
-        />
-        <ol className="list-inside list-decimal text-sm text-center sm:text-left font-[family-name:var(--font-geist-mono)]">
-          <li className="mb-2">
-            Get started by editing{" "}
-            <code className="bg-black/[.05] dark:bg-white/[.06] px-1 py-0.5 rounded font-semibold">
-              pages/index.js
-            </code>
-            .
-          </li>
-          <li>Save and see your changes instantly.</li>
-        </ol>
-
-        <div className="flex gap-4 items-center flex-col sm:flex-row">
-          <a
-            className="rounded-full border border-solid border-transparent transition-colors flex items-center justify-center bg-foreground text-background gap-2 hover:bg-[#383838] dark:hover:bg-[#ccc] text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="https://nextjs.org/icons/vercel.svg"
-              alt="Vercel logomark"
-              width={20}
-              height={20}
-            />
-            Deploy now
-          </a>
-          <a
-            className="rounded-full border border-solid border-black/[.08] dark:border-white/[.145] transition-colors flex items-center justify-center hover:bg-[#f2f2f2] dark:hover:bg-[#1a1a1a] hover:border-transparent text-sm sm:text-base h-10 sm:h-12 px-4 sm:px-5 sm:min-w-44"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Read our docs
-          </a>
+    <div className="relative py-4" ref={dropdownRef}>
+      <div
+        className="border rounded p-2 mb-2 cursor-pointer justify-between flex"
+        onClick={handleToggleDropdown}
+      >
+        <div className='absolute top-[18px] text-[10px] text-slate-600'>Role</div>
+        <p className='text-sm text-slate-500 mt-3'>
+          {selectedValues.length > 0
+            ? selectedValues.join(', ')
+            : 'Select'}
+        </p>
+        <span className='mr-2'>▼</span>
+      </div>
+      {isOpen && (
+        <div className="absolute right-0 top-10 border rounded bg-white shadow-lg z-10">
+          {options.map((option) => (
+            <div
+              key={option.value}
+              onClick={() => handleChange(option.value)}
+              className={`p-2 cursor-pointer hover:bg-gray-200 ${selectedValues.includes(option.value) ? 'font-bold' : ''}`}
+            >
+              {option.label}
+            </div>
+          ))}
         </div>
-      </main>
-      <footer className="row-start-3 flex gap-6 flex-wrap items-center justify-center">
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/file.svg"
-            alt="File icon"
-            width={16}
-            height={16}
-          />
-          Learn
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/window.svg"
-            alt="Window icon"
-            width={16}
-            height={16}
-          />
-          Examples
-        </a>
-        <a
-          className="flex items-center gap-2 hover:underline hover:underline-offset-4"
-          href="https://nextjs.org?utm_source=create-next-app&utm_medium=default-template-tw&utm_campaign=create-next-app"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          <Image
-            aria-hidden
-            src="https://nextjs.org/icons/globe.svg"
-            alt="Globe icon"
-            width={16}
-            height={16}
-          />
-          Go to nextjs.org →
-        </a>
-      </footer>
+      )}
+      <div className="flex flex-wrap mt-2">
+        {selectedValues.map((value) => (
+          <div key={value} className="flex items-center bg-gray-200 rounded px-2 py-1 mr-2 mb-2">
+            {value}
+            <button
+              type="button"
+              onClick={() => handleRemove(value)}
+              className="ml-2 text-red-500 hover:text-red-700"
+            >
+              X
+            </button>
+          </div>
+        ))}
+      </div>
     </div>
   );
-}
+};
+
+const EmailSelector = ({ options, selectedValues, onChange }) => {
+  const handleChange = (value) => {
+    onChange(selectedValues.includes(value)
+      ? selectedValues.filter((v) => v !== value)
+      : [...selectedValues, value]);
+  };
+
+  return (
+    <div className="mb-4 relative">
+
+      <div className='absolute top-[2px] left-[7px] text-[10px] text-slate-600'>Email Address *</div>
+      <div className="border pt-4 p-2 rounded mb-2 flex flex-wrap">
+        {options.map((option) => (
+          <div
+            key={option.value}
+            onClick={() => handleChange(option.value)}
+            className={`p-2 flex gap-2 justify-between cursor-pointer mr-2 mb-2 rounded-full border transition-colors 
+                        ${selectedValues.includes(option.value) ? 'bg-gray-300 border-blue-500' : ' border-gray-300'}`}
+          >
+            <p className='text-[10px] font-thin '>{option.label}</p>
+            <p className='text-[9px] font-thin '>X</p>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+};
+
+const MyForm = () => {
+  const options = [
+    { value: 'Warehouse manager', label: 'Warehouse manager' },
+    { value: 'Employee', label: 'Employee' },
+    { value: 'Company Manager', label: 'Company Manager' },
+    { value: 'Date', label: 'Date' },
+  ];
+
+  const emails = [
+    { value: 'varun1291@gmail.com', label: 'varun1291@gmail.com' },
+    { value: 'varun1211@gmail.com', label: 'varun1211@gmail.com' },
+  ];
+
+  const warehouse = [
+    { value: 'WareHouse1', label: 'WareHouse1' },
+    { value: 'WareHouse2', label: 'WareHouse2' },
+  ]
+  const { control, handleSubmit, formState: { errors } } = useForm({
+    defaultValues: {
+      role: [], 
+      email: [],
+      warehouse: []
+    },
+  });
+
+  const onSubmit = (data) => {
+    console.log(data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="p-4">
+      <Controller
+        name="role"
+        control={control}
+        rules={{ required: 'At least one role must be selected' }} // Validation rule
+        render={({ field: { onChange, value } }) => (
+          <MultiSelectDropdown
+            options={options}
+            selectedValues={value}
+            onChange={onChange}
+          />
+        )}
+      />
+      {errors.role && <p className="text-red-500">{errors.role.message}</p>} {/* Error message */}
+
+      <Controller
+        name="email"
+        control={control}
+        rules={{ required: 'At least one Email must be selected' }} // Validation rule
+        render={({ field: { onChange, value } }) => (
+          <EmailSelector
+            options={emails}
+            selectedValues={value}
+            onChange={onChange}
+          />
+        )}
+      />
+      {errors.email && <p className="text-red-500">{errors.email.message}</p>} {/* Error message */}
+
+      <Controller
+        name="warehouse"
+        control={control}
+        rules={{ required: 'At least one warehouse must be selected' }} // Validation rule
+        render={({ field: { onChange, value } }) => (
+          <EmailSelector
+            options={warehouse}
+            selectedValues={value}
+            onChange={onChange}
+          />
+        )}
+      />
+      {errors.warehouse && <p className="text-red-500">{errors.warehouse.message}</p>} {/* Error message */}
+
+
+      <button type="submit" className="bg-slate-900 text-md text-white px-4 py-2 rounded hover:bg-blue-600 rounded-lg mt-3">
+        Invite
+      </button>
+    </form>
+  );
+};
+
+const App = () => {
+  return (
+  <div className='flex justify-center items-center h-[100vh] bg-slate-400'>
+      <div className="max-w-md mx-auto bg-white p-8 rounded-xl ">
+      <h1 className="text-2xl font-bold mb-4 ml-4">Add team</h1>
+      <MyForm />
+      </div>
+  </div>
+  );
+};
+
+export default App;
