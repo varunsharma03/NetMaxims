@@ -1,9 +1,18 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { useForm, Controller } from 'react-hook-form';
+import { z } from 'zod';
+import { zodResolver } from '@hookform/resolvers/zod';
+
+const schema = z.object({
+  role: z.array(z.string()).min(1, 'At least one role must be selected'),
+  email: z.array(z.string()).min(1, 'At least one email must be selected'),
+  warehouse: z.array(z.string()).min(1, 'At least one warehouse must be selected'),
+});
 
 const MultiSelectDropdown = ({ options, selectedValues, onChange }) => {
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef(null); 
+
   const handleToggleDropdown = () => {
     setIsOpen((prev) => !prev);
   };
@@ -17,6 +26,7 @@ const MultiSelectDropdown = ({ options, selectedValues, onChange }) => {
   const handleRemove = (value) => {
     onChange(selectedValues.filter((v) => v !== value));
   };
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -84,7 +94,6 @@ const EmailSelector = ({ options, selectedValues, onChange }) => {
 
   return (
     <div className="mb-4 relative">
-
       <div className='absolute top-[2px] left-[7px] text-[10px] text-slate-600'>Email Address *</div>
       <div className="border pt-4 p-2 rounded mb-2 flex flex-wrap">
         {options.map((option) => (
@@ -119,8 +128,10 @@ const MyForm = () => {
   const warehouse = [
     { value: 'WareHouse1', label: 'WareHouse1' },
     { value: 'WareHouse2', label: 'WareHouse2' },
-  ]
+  ];
+
   const { control, handleSubmit, formState: { errors } } = useForm({
+    resolver: zodResolver(schema), 
     defaultValues: {
       role: [], 
       email: [],
@@ -130,6 +141,8 @@ const MyForm = () => {
 
   const onSubmit = (data) => {
     console.log(data);
+    const combined = [data.role, ...data.email, ...data.warehouse].flat();
+    window.alert(combined);
   };
 
   return (
@@ -137,7 +150,6 @@ const MyForm = () => {
       <Controller
         name="role"
         control={control}
-        rules={{ required: 'At least one role must be selected' }} // Validation rule
         render={({ field: { onChange, value } }) => (
           <MultiSelectDropdown
             options={options}
@@ -146,12 +158,11 @@ const MyForm = () => {
           />
         )}
       />
-      {errors.role && <p className="text-red-500">{errors.role.message}</p>} {/* Error message */}
+      {errors.role && <p className="text-red-500">{errors.role.message}</p>}
 
       <Controller
         name="email"
         control={control}
-        rules={{ required: 'At least one Email must be selected' }} // Validation rule
         render={({ field: { onChange, value } }) => (
           <EmailSelector
             options={emails}
@@ -160,12 +171,11 @@ const MyForm = () => {
           />
         )}
       />
-      {errors.email && <p className="text-red-500">{errors.email.message}</p>} {/* Error message */}
+      {errors.email && <p className="text-red-500">{errors.email.message}</p>}
 
       <Controller
         name="warehouse"
         control={control}
-        rules={{ required: 'At least one warehouse must be selected' }} // Validation rule
         render={({ field: { onChange, value } }) => (
           <EmailSelector
             options={warehouse}
@@ -174,8 +184,7 @@ const MyForm = () => {
           />
         )}
       />
-      {errors.warehouse && <p className="text-red-500">{errors.warehouse.message}</p>} {/* Error message */}
-
+      {errors.warehouse && <p className="text-red-500">{errors.warehouse.message}</p>}
 
       <button type="submit" className="bg-slate-900 text-md text-white px-4 py-2 rounded hover:bg-blue-600 rounded-lg mt-3">
         Invite
@@ -186,12 +195,12 @@ const MyForm = () => {
 
 const App = () => {
   return (
-  <div className='flex justify-center items-center h-[100vh] bg-slate-400'>
+    <div className='flex justify-center items-center h-[100vh] bg-slate-400'>
       <div className="max-w-md mx-auto bg-white p-8 rounded-xl ">
-      <h1 className="text-2xl font-bold mb-4 ml-4">Add team</h1>
-      <MyForm />
+        <h1 className="text-2xl font-bold mb-4 ml-4">Add team</h1>
+        <MyForm />
       </div>
-  </div>
+    </div>
   );
 };
 
